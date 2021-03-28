@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Codify Console</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="icon" type="image/svg+xml" href="../assets/vectors/console.svg">
+    <link rel='stylesheet' type='text/css' media='screen' href='../public_modules/codemirror/lib/codemirror.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='../public_modules/codemirror/theme/monokai.css'>
+    <script src='../public_modules/codemirror/lib/codemirror.js'></script>
+    <script src='../public_modules/codemirror/mode/javascript/javascript.js'></script>
+    <link rel='stylesheet' type='text/css' media='screen' href='../public_modules/prism/prism.css'>
+    <script src='../public_modules/prism/prism.js'></script>
+    <style>
+        @font-face { font-family: Consolas; font-weight: italic; src: url("../assets/fonts/ConsolasI.ttf");}
+        @font-face { font-family: Consolas; font-weight: bold; src: url("../assets/fonts/ConsolasB.ttf");}
+        @font-face { font-family: Consolas; src: url("../assets/fonts/ConsolasR.ttf");}
+        body {
+            background-color: rgb(75, 75, 75);
+            overflow-x: hidden;
+        }
+        code {
+            filter: invert(1);
+        }
+        .CodeMirror {
+        width: 100%;
+        height: 100%;
+        font-size: large;
+        }
+        
+        /* width */
+         ::-webkit-scrollbar {
+        width: 5px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+        background: black;
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 5px;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+        }
+        
+        #nav-bar {
+            position: fixed;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 8%;
+            background-color: rgb(26, 26, 26);
+            z-index: 10;
+        }
+        #nav-bar #logo {
+            position: absolute;
+            top: 15%;
+            left: 0%;
+            width: 5%;
+            height: 70%;
+            background-image: url(../assets/vectors/console.svg);
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: invert(1);
+            cursor: pointer;
+        }
+        #nav-bar #title {
+            position: absolute;
+            top: 15%;
+            left: 4.5%;
+            width: 10%;
+            height: 70%;
+            font-family: Consolas;
+            font-weight: bold;
+            color: white;
+            font-size: xx-large;
+            line-height: 0px;
+            cursor: pointer;
+            user-select: none;
+        }
+        #code-area {
+            margin: 0px;
+            position: absolute;
+            top: 15%;
+            left: 26%;
+            width: 70%;
+            height: 80%;
+        }
+        #wrapper {
+            position: absolute;
+            left: 0%;
+            top: 0%;
+            width: 50%;
+            height: 100%;
+        }
+        #console {
+            position: absolute;
+            right: -1.3%;
+            top: -1.3%;
+            width: 50%;
+            height: 100%;
+            font-family: Consolas;
+            font-weight: italic;
+            background-color: black;
+            margin: 10px;
+            overflow-y: scroll;
+            line-height: 10px;
+        }
+        #console .error {
+            color: red;
+        }
+        #console .log {
+            color: rgb(1, 221, 1);
+        }
+        #execute {
+            position: absolute;
+            right: 0%;
+            top: 1%;
+            width: 50px;
+            height: 20px;
+            padding: 5px;
+            padding-right: 10px;
+            border-radius: 3px;
+            font-family: Consolas;
+            line-height: 20px;
+            font-weight: bold;
+            text-align: right;
+            background-image: url(../assets/vectors/play.svg);
+            background-size: 100% 100%;
+            background-position-x: -15px;
+            background-repeat: no-repeat;
+            background-color: white;
+            cursor: pointer;
+            filter: invert(1);
+            border: none;
+            transition-duration: 0.4s;
+        }
+        #execute:hover {
+            filter: brightness(0.8);
+        }
+        
+        #select-area .option{
+            font-family: Consolas;
+            color: white;
+            text-decoration: underline;
+            margin-left: 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+        #select-area .option:hover{
+        color: gold;
+        }
+        @media only screen and (min-width: 768px) {
+            #task-area {
+            position: absolute;
+            top: 15%;
+            left: 4%;
+            width: 21%;
+            height: 30%;
+            background-color: black;
+            font-family: Consolas;
+            color: white;
+            overflow-wrap: normal;
+            overflow-y: scroll;
+        }
+        #select-area {
+            position: absolute;
+            top: 47%;
+            left: 4%;
+            width: 21%;
+            height: 48%;
+            background-color: rgb(20, 20, 20);
+            overflow-y: scroll;
+        }
+        #nav-bar #menu { display: none;}
+         }
+         #nav-bar #desktop-menu {
+           position: absolute;
+           width: 40%;
+           height: 100%;
+           background-color: transparent;
+           top: 0%;
+           right: 0%;
+           display: grid;
+           grid-template-columns: auto auto auto auto;
+       }
+       #nav-bar #desktop-menu .title {
+            font-family: Consolas;
+            font-size: large;
+            font-weight: bold;
+            color: white;
+            line-height: 50px;
+            text-align: center;
+            cursor: pointer;
+            transition-duration: 0.2s;
+       }
+       #nav-bar #desktop-menu .title:hover {
+            filter: brightness(0.6);
+       }
+        @media only screen and (max-width: 768px) {
+            #nav-bar {
+                position: fixed;
+                top: 0%;
+                height: 80px;
+            }
+            #nav-bar #logo {
+                width: 80px;
+            }
+            #nav-bar #desktop-menu {
+                display: none;
+            }
+            #nav-bar #title {
+                left: 80px;
+            }
+            #code-area {
+                margin: 0px;
+                position: absolute;
+                top: 340px;
+                left: 2%;
+                width: 96%;
+                height: 600px;
+            }
+            #wrapper {
+                width: 100%;
+                height: 98%;
+            }
+            #console {
+                width: 100%;
+                height: 100%;
+                position: fixed;
+                left: -3%;
+                top: 70px;
+                z-index: 8;
+                overscroll-behavior: contain;
+                transform: translateX(100%);
+                transition-duration: 0.2s;
+            }
+            #console.visible {
+                transform: translateX(0%);
+            }
+            #execute {
+                position: fixed;
+                right: 3%;
+                top: 130px;
+                z-index: 8;
+                transform: translateX(500%);
+                transition-duration: 0.2s;
+            }
+            #execute.visible {
+                transform: translateX(0%);
+            }
+                #task-area {
+                position: absolute;
+                top: 140px;
+                left: 2%;
+                width: 96%;
+                height: 180px;
+                background-color: black;
+                font-family: Consolas;
+                color: white;
+                overflow-wrap: normal;
+                overflow-y: scroll;
+            }
+            #select-area {
+                position: fixed;
+                top: 80px;
+                left: 0%;
+                width: 100%;
+                height: 90%;
+                background-color: rgb(20, 20, 20);
+                overflow-y: scroll;
+                z-index: 9;
+                transform: translateX(-100%);
+                transition-duration: 0.3s;
+            }
+            #select-area.active {
+                transform: translateX(0%);
+            }
+            #nav-bar #menu {
+                position: absolute;
+                right: 0%;
+                top: 25%;
+                width: 45px;
+                height: 40px;
+                z-index: 10;
+            }
+            #nav-bar #menu .bar {
+                width: 30px;
+                height: 4px;
+                background-color: white;
+                border-radius: 2px;
+                margin-top: 8px;
+                transition-duration: 0.2s;
+            }
+            #nav-bar #menu #bar1.active {
+                transform: rotate(-45deg) translate(-9px,8px);
+            }
+            #nav-bar #menu #bar2.active {
+                opacity: 0;
+            }
+            #nav-bar #menu #bar3.active {
+                transform: rotate(45deg) translate(-9px,-8px);
+            }
+            #mobile-console {
+                position: absolute;
+                top: 95px;
+                padding: 5px;
+                right: 2%;
+                width: 120px;
+                height: 20px;
+                font-family: Consolas;
+                line-height: 20px;
+                background-color: black;
+                color: white;
+                text-align: center;
+                border-radius: 5px;
+                transition-duration: 0.4s;
+                z-index: 5;
+            }
+            #mobile-console:hover {
+               filter: invert(0.8);
+            }
+            #mobile-console-close {
+                position: fixed;
+                right: 3%;
+                top: 100px;
+                z-index: 8;
+                width: 50px;
+                height: 20px;
+                padding: 5px;
+                padding-right: 10px;
+                border-radius: 3px;
+                font-family: Consolas;
+                line-height: 20px;
+                text-align: right;
+                background-color: black;
+                color: white;
+                border: none;
+                transform: translateX(500%);
+                transition-duration: 0.2s;
+            }
+            #mobile-console-close:hover {
+               filter: invert(0.8);
+            }
+            #mobile-console-close.visible {
+                transform: translateX(0%);
+            }
+        }
+       
+    </style>
+</head>
+<body>
+    <div id="nav-bar">
+        <div id="logo"></div>
+        <p id="title">Cod:fy</p>
+        <div id="menu">
+            <div id="bar1" class="bar"></div>
+            <div id="bar2" class="bar"></div>
+            <div id="bar3" class="bar"></div>
+        </div>
+        <div id="desktop-menu">
+            <a href="/"><p class="title">Home</p></a>
+            <a href="/console"><p class="title">Console</p></a>
+            <a href="/console?index=1"><p class="title">Lessons</p></a>
+            <a href="/?login=true"><p class="title">Login</p></a>
+        </div>
+    </div>
+    <div id="mobile-console">Open console</div>
+    <div id="code-area">
+        <div id="wrapper"></div>
+        <div id="console"></div>
+        <div id="execute">Run</div>
+        <div id="mobile-console-close">Close</div>
+    </div>
+    <div id="task-area">  
+    </div>
+    <div id="select-area">
+    </div>
+
+<script>
+    var data = [
+        {
+            name: '1.Introduction to Javascript',
+            index: 1
+        },
+        {
+            name: '2.Data types',
+            index: 2
+        },
+        {
+            name: '3.Function, parameters and return',
+            index: 3
+            
+        },
+        {
+            name: '4.Introduction to Arrays and Objects',
+            index: 4
+        },
+        {
+            name: '5.Basic Math procedures',
+            index: 5
+        },
+    ]
+    class NavigationBar{
+        constructor() {
+            this.element = document.getElementById('nav-bar');
+            this.logo = this.element.querySelector('#logo')
+            this.menu = this.element.querySelector('#menu');
+            this.drawer = document.getElementById('select-area')
+            this.menu.addEventListener('click',()=>{
+                let children = this.menu.children
+                if (children[0].classList[1] === 'active') {
+                    children[0].classList.remove('active');
+                    children[1].classList.remove('active');
+                    children[2].classList.remove('active');
+                    this.drawer.classList.remove('active')
+                } else {
+                    children[0].classList.add('active');
+                    children[1].classList.add('active');
+                    children[2].classList.add('active');
+                    this.drawer.classList.add('active')
+                }
+            })
+            this.logo.addEventListener('click',()=>{
+                location.href = '/'
+            })
+        }
+    }
+    class CodeArea {
+        constructor() {
+            this.legacyOnError = window.onerror;
+            this.legacyConsole = {
+                log: console.log,
+                error: console.error,
+                debug: console.debug,
+                info: console.info
+            }
+            var getTime = ()=>{
+                let d = new Date();
+                let hour = d.getHours()
+                let minute = d.getMinutes()
+                let second = d.getSeconds()
+                let hourString = ''
+                let minuteString = ''
+                let secondString = ''
+                if (hour < 10) {
+                    hourString = `0${hour}`
+                } else {
+                    hourString = `${hour}`
+                }
+                if (minute < 10) {
+                    minuteString = `0${minute}`
+                } else {
+                    minuteString = `${minute}`
+                }
+                if (second < 10) {
+                    secondString = `0${second}`
+                } else {
+                    secondString = `${second}`
+                }
+                var time = `[${hourString}:${minuteString}:${secondString}]`
+                return time;
+            }
+            this.executeButton = document.getElementById('execute')
+            this.myTextArea = document.getElementById("wrapper")
+            this.myCodeMirror = CodeMirror(this.myTextArea, {
+                value: `//Write your Javascript here!\nconsole.log("Hello world!")`,
+                mode:  "javascript",
+                lineWrapping : true,
+                theme : "monokai",
+                lineNumbers: true,
+                allowDropFileTypes: ['text/javascript']
+                });
+
+            this.execute=(window, self, top, document)=>{
+                'use strict'; 
+                eval(this.myCodeMirror.getValue());
+            }
+            this.executeButton.addEventListener('click',()=>{
+                document.getElementById("console").innerHTML += '';
+                if (typeof console  != "undefined") 
+                    if (typeof console.log != 'undefined')
+                        console.olog = console.log;
+                    else
+                        console.olog = function() {};
+                console.log = function(message) {
+                    console.olog(message);
+                    if (typeof(message) === 'object') {
+                        document.getElementById("console").innerHTML +='<p class="log">' + getTime() + JSON.stringify(message)+'</p>';
+                    } else {
+                        document.getElementById("console").innerHTML +='<p class="log">' + getTime() + message +'</p>';
+                    }
+                };
+                console.error = console.debug = console.info =  console.log
+                window.onerror = function(error, url, line) {
+                document.getElementById("console").innerHTML +='<p class="error">' + getTime() + error +'. At line: '+ line +'</p>';
+                };
+                this.execute()
+                window.onerror = this.legacyOnError;
+                console.log = this.legacyConsole.log
+                console.debug = this.legacyConsole.debug
+                console.error = this.legacyConsole.error
+                console.info = this.legacyConsole.info
+            })
+        }
+    }
+    class TaskArea {
+        constructor() {
+            this.element = document.getElementById('task-area');
+            this.renderContent = (content) => {
+                this.element.innerHTML = content;
+            }
+            fetch(`/api/data${window.location.search}`)
+            .then(response => response.json())
+            .then(data => {
+                this.renderContent(data.content);
+                Prism.highlightAll();
+                document.title = data.name;
+            });
+        }
+    }
+    class MobileConsole {
+        constructor () {
+            this.element = document.getElementById('console')
+            this.openButton = document.getElementById('mobile-console')
+            this.closeButton = document.getElementById('mobile-console-close')
+            this.executeButton = document.getElementById('execute')
+            this.openButton.addEventListener('click',()=>{
+                this.element.classList.add('visible')
+                this.closeButton.classList.add('visible')
+                this.executeButton.classList.add('visible')
+            })
+            this.closeButton.addEventListener('click',()=>{
+                this.element.classList.remove('visible')
+                this.closeButton.classList.remove('visible')
+                this.executeButton.classList.remove('visible')
+            })
+        }
+    }
+    class SelectArea {
+        constructor () {
+            this.element = document.getElementById('select-area');
+            this.tasks = [];
+            this.renderTasks=()=>{
+                for (let i = 0; i< this.tasks.length;i++) {
+                this.element.innerHTML += `<a href="/console?index=${this.tasks[i].index}"><p class="option" id="option-${i}">${this.tasks[i].name}</p></a>`
+                var currEle = document.getElementById(`option-${i}`).addEventListener('click',()=>{
+                    this.taskarea.renderContent(this.tasks[i].content)
+                })
+                }
+            }
+            this.selectTask
+        }
+    }
+    var nav = new NavigationBar()
+    var codearea = new CodeArea()
+    var taskarea = new TaskArea()
+    var selectarea = new SelectArea(taskarea)
+    var console = new MobileConsole()
+    selectarea.tasks = data;
+    selectarea.renderTasks()
+</script>
+</body>
+</html>

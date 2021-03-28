@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <link rel="icon" type="image/svg+xml" href="../assets/vectors/console.svg">
+    <title>Codify - Code everywhere, free, forever</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <style>
+        @font-face { font-family: Consolas; font-weight: italic; src: url("../assets/fonts/ConsolasI.ttf");}
+        @font-face { font-family: Consolas; font-weight: bold; src: url("../assets/fonts/ConsolasB.ttf");}
+        @font-face { font-family: Consolas; src: url("../assets/fonts/ConsolasR.ttf");}
+         body {
+            background-color: rgb(75, 75, 75);
+            overflow-x: hidden;
+        }
+        #nav-bar {
+            position: fixed;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 80px;
+            background-color: rgb(26, 26, 26);
+            z-index: 10;
+        }
+        #nav-bar #logo {
+            position: absolute;
+            top: 15%;
+            left: 0%;
+            width: 5%;
+            height: 70%;
+            background-image: url(../assets/vectors/console.svg);
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: invert(1);
+            cursor: pointer;
+        }
+        #nav-bar #title {
+            position: absolute;
+            top: 15%;
+            left: 4.5%;
+            width: 10%;
+            height: 70%;
+            font-family: Consolas;
+            font-weight: bold;
+            color: white;
+            font-size: xx-large;
+            line-height: 0px;
+            cursor: pointer;
+            user-select: none;
+        }
+        #main {
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 100%;
+            background-image: url(../assets/images/background.png);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        #main #wrapper {
+            position: absolute;
+            top: 32%;
+            left: 20%;
+            width: 60%;
+            height: 60%;
+        }
+        #main #wrapper .title{
+            font-family: Consolas;
+            color: white;
+            font-weight: bold;
+            font-size: 60px;
+            text-align: center;
+        }
+        #main #wrapper .desc{
+            font-family: Consolas;
+            color: white;
+            font-weight: bold;
+            font-size: 30px;
+            text-align: center;
+        }
+        #main #wrapper .start{
+            width: 200px;
+            height: 55px;
+            background-color: rgb(26, 26, 26);
+            font-family: Consolas;
+            color: white;
+            font-weight: bold;
+            line-height: 55px;
+            margin: 0 auto;
+            font-size: 25px;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+            transition-duration: 0.4s;
+        }
+        #main #wrapper .start:hover{
+            filter: invert(1);
+        }
+        a {
+            text-decoration: none;
+        }
+        #auth {
+           position: fixed;
+           top: 0%;
+           left: 0%;
+           width: 100%;
+           height: 100%;
+           z-index: -1;
+           transition-duration: 0.2s;
+       }
+       #auth.visible {
+        backdrop-filter: blur(6px) brightness(0.7);
+        z-index: 20;
+       }
+       #auth #wrapper {
+           position: absolute;
+           top: 30%;
+           left: 40%;
+           width: 20%;
+           height: 400px;
+           background-color: rgb(26, 26, 26);
+           border-radius: 5px;
+       }
+       #auth #wrapper .title {
+            font-family: Consolas;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            text-align: center;
+       }
+       #auth #wrapper #login {
+            position: absolute;
+           top: 20%;
+           left: 5%;
+           width: 90%;
+           height: 70%;
+           background-color: transparent;
+           border-radius: 5px;
+           opacity: 0;
+           transform: translateX(-300%);
+           transition-duration: 0.4s;
+       }
+       #auth #wrapper #login.active {
+            opacity: 1;
+            transform: translateX(0%);
+       }
+       input {
+        background-color: white;
+        position: relative;
+        left: 10%;
+        width: 70%;
+        height: 30px;
+        padding-left: 5%;
+        margin-top: 5%;
+        padding-right: 5%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        font-family: Consolas;
+        font-size: large;
+        font-weight: bold;
+        border: none;
+        }
+        label {
+        position: relative;
+        left: 10%;
+        top: 7%;
+        width: 70%;
+        font-family: Consolas;
+        font-size: normal;
+        color: white;
+        }
+        #auth #wrapper #login #login-submit {
+            position: absolute;
+            right: 10%;
+            bottom: 20%;
+            width: 38%;
+            height: 50px;
+            background-color: green;
+            border: none;
+            border-radius: 5px;
+            font-family: Consolas;
+            font-size: large;
+            color: white;
+            cursor: pointer;
+            transition-duration: 0.2s;
+       }
+       #auth #wrapper #login #login-submit:hover {
+           filter: brightness(0.5);
+       }
+       #auth #wrapper #login #login-cancel {
+            position: absolute;
+            left: 10%;
+            bottom: 20%;
+            width: 38%;
+            height: 50px;
+            background-color: white;
+            border: none;
+            border-radius: 5px;
+            font-family: Consolas;
+            font-size: large;
+            color: grey;
+            cursor: pointer;
+            transition-duration: 0.2s;
+       }
+       #auth #wrapper #login #login-cancel:hover {
+           filter: brightness(0.5);
+       }
+       #auth #wrapper #login #login-google {
+            position: absolute;
+            right: 10%;
+            bottom: -5%;
+            width: 80%;
+            height: 50px;
+            background-color: white;
+            border: none;
+            border-radius: 5px;
+            font-family: Consolas;
+            font-size: large;
+            color: black;
+            cursor: pointer;
+            transition-duration: 0.2s;
+            background-image: url(../assets/vectors/google.svg);
+            background-size: 60% 60%;
+            background-repeat: no-repeat;
+            background-position-x: -46%;
+            background-position-y: center;
+       }
+       #auth #wrapper #login #login-google:hover {
+           filter: brightness(0.5);
+       }
+       #auth #wrapper #login #incorrect {
+           position: relative;
+           top: -1%;
+           left: 10%;
+            font-family: Consolas;
+            font-size: small;
+            color: red;
+            display: none;
+       }
+       #auth #wrapper #login #incorrect.visible {
+           display: block;
+       }
+       #auth #wrapper #headbar {
+        position: absolute;
+            left: 30%;
+            top: 13%;
+            width: 40%;
+            height: 30px;
+            cursor: pointer;
+       }
+       #auth #wrapper #headbar #sl-login {
+            position: absolute;
+            left: 0%;
+            top: 0%;
+            width: 50%;
+            height: 100%;
+            background-color: rgb(9, 11, 14);
+            border: none;
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+            border-top-right-radius: 0px;
+            border-bottom-right-radius: 0px;
+            font-family: Consolas;
+            font-size: large;
+            color: white;
+       }
+       #auth #wrapper #headbar #sl-register {
+            position: absolute;
+            right: 0%;
+            top: 0%;
+            width: 50%;
+            height: 100%;
+            background-color: rgb(9, 11, 14);
+            border: none;
+            border-top-left-radius: 0px;
+            border-bottom-left-radius: 0px;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+       }
+       #auth #wrapper #headbar #sl-login.active {
+            filter: invert(1);
+       }
+       #auth #wrapper #headbar #sl-register.active {
+            filter: invert(1);
+       }
+       #auth #wrapper #headbar .title {
+            font-family: Consolas;
+            font-size: 15px;
+            text-align: center;
+            line-height: 0px;
+            font-size: normal;
+            color: white;
+       }
+       #auth #wrapper #register {
+            position: absolute;
+           top: 20%;
+           left: 5%;
+           width: 90%;
+           height: 70%;
+           background-color: transparent;
+           border-radius: 5px;
+           opacity: 0;
+           transform: translateX(300%);
+           transition-duration: 0.4s;
+       }
+       #auth #wrapper #register.active {
+            opacity: 1;
+            transform: translateX(0%);
+       }
+       #auth #wrapper #register #register-submit {
+            position: absolute;
+            right: 10%;
+            bottom: -4%;
+            width: 38%;
+            height: 50px;
+            background-color: green;
+            border: none;
+            border-radius: 5px;
+            font-family: Consolas;
+            font-size: large;
+            color: white;
+            cursor: pointer;
+            transition-duration: 0.2s;
+       }
+       #auth #wrapper #register #register-submit:hover {
+           filter: brightness(0.5);
+       }
+       #auth #wrapper #register #register-cancel {
+            position: absolute;
+            left: 10%;
+            bottom: -4%;
+            width: 38%;
+            height: 50px;
+            background-color: white;
+            border: none;
+            border-radius: 5px;
+            font-family: Consolas;
+            font-size: large;
+            color: grey;
+            cursor: pointer;
+            transition-duration: 0.2s;
+       }
+       #auth #wrapper #register #register-cancel:hover {
+           filter: brightness(0.5);
+       }
+       #nav-bar #desktop-menu {
+           position: absolute;
+           width: 40%;
+           height: 100%;
+           background-color: transparent;
+           top: 0%;
+           right: 0%;
+           display: grid;
+           grid-template-columns: auto auto auto auto;
+       }
+       #nav-bar #desktop-menu .title {
+            font-family: Consolas;
+            font-size: large;
+            font-weight: bold;
+            color: white;
+            line-height: 50px;
+            text-align: center;
+            cursor: pointer;
+            transition-duration: 0.2s;
+       }
+       #nav-bar #desktop-menu .title:hover {
+            filter: brightness(0.6);
+       }
+       #nav-bar #mobile-menu {
+           position: fixed;
+           width: 80%;
+           height: 100%;
+           background-color: black;
+           top: 0%;
+           right: 0%;
+           z-index: 30;
+           transform: translateX(100%);
+           transition-duration: 0.3s;
+           opacity: 0.95;
+           backdrop-filter: blur(6px) brightness(0.7);
+           display: none;
+       }
+       #nav-bar #mobile-menu.active {
+           transform: translateX(0%);
+       }
+       #nav-bar #mobile-menu .title {
+           position: relative;
+           top: 20%;
+            font-family: Consolas;
+            font-size: large;
+            font-weight: bold;
+            color: white;
+            line-height: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition-duration: 0.2s;
+       }
+       #nav-bar #mobile-menu .title:hover {
+            filter: brightness(0.6);
+       }
+        @media only screen and (max-width: 768px) {
+            #nav-bar {
+                position: fixed;
+                top: 0%;
+                height: 80px;
+            }
+            #nav-bar #logo {
+                width: 80px;
+            }
+            #nav-bar #title {
+                left: 80px;
+            }
+            #nav-bar #desktop-menu {
+                display: none;
+            }
+            #nav-bar #mobile-menu {
+                display: block;
+            }
+            #nav-bar #menu {
+                position: absolute;
+                right: 0%;
+                top: 25%;
+                width: 45px;
+                height: 40px;
+                z-index: 31;
+            }
+            #nav-bar #menu .bar {
+                width: 30px;
+                height: 4px;
+                background-color: white;
+                border-radius: 2px;
+                margin-top: 8px;
+                transition-duration: 0.2s;
+            }
+            #nav-bar #menu #bar1.active {
+                transform: rotate(-45deg) translate(-9px,8px);
+            }
+            #nav-bar #menu #bar2.active {
+                opacity: 0;
+            }
+            #nav-bar #menu #bar3.active {
+                transform: rotate(45deg) translate(-9px,-8px);
+            }
+            #main {
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 100%;
+            background-image: url(../assets/images/background.png);
+            background-size: cover;
+            background-position: left;
+            background-repeat: no-repeat;
+        }
+            #main #wrapper {
+                position: absolute;
+                top: 30%;
+                left: 5%;
+                width: 90%;
+                height: 60%;
+            }
+            #main #wrapper .title{
+                font-family: Consolas;
+                color: white;
+                font-weight: bold;
+                font-size: 32px;
+                text-align: center;
+            }
+            #main #wrapper .desc{
+                position: relative;
+                top: -3%;
+                font-family: Consolas;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+                text-align: center;
+                line-height: 0px;
+            }
+            #main #wrapper .start{
+                position: relative;
+                top: 5%;
+                width: 100px;
+                height: 30px;
+                background-color: rgb(26, 26, 26);
+                font-family: Consolas;
+                color: white;
+                font-weight: bold;
+                line-height: 30px;
+                margin: 0 auto;
+                font-size: 13px;
+                text-align: center;
+                border-radius: 5px;
+                cursor: pointer;
+                transition-duration: 0.4s;
+            }
+            #main #wrapper .start:hover{
+                filter: invert(1);
+            }
+            #auth #wrapper {
+                position: absolute;
+                top: 18%;
+                height: 400px;
+                width: 96%;
+                left: 2%;
+            }
+            label {
+            position: relative;
+            left: 10%;
+            top: 5%;
+            width: 70%;
+            font-family: Consolas;
+            font-size: normal;
+            color: white;
+            }
+        }
+       
+    </style>
+</head>
+<body>
+    <div id="nav-bar">
+        <div id="logo"></div>
+        <p id="title">Cod:fy</p>
+        <div id="menu">
+            <div id="bar1" class="bar"></div>
+            <div id="bar2" class="bar"></div>
+            <div id="bar3" class="bar"></div>
+        </div>
+        <div id="desktop-menu">
+            <a href="/"><p class="title">Home</p></a>
+            <a href="/console"><p class="title">Console</p></a>
+            <a href="/console?index=1"><p class="title">Lessons</p></a>
+            <p class="title" id="main-login-desktop">Login</p>
+        </div>
+        <div id="mobile-menu">
+            <a href="/"><p class="title">Home</p></a>
+            <a href="/console"><p class="title">Console</p></a>
+            <a href="/console?index=1"><p class="title">Lessons</p></a>
+            <p class="title" id="main-login-mobile">Login</p>
+        </div>
+    </div>
+    <div id="main">
+        <div id="wrapper">
+            <p class="title">Learn programming on the go</p>
+            <p class="desc">Run code on every platform. Free, forever</p>
+            <div id="learnmore" class="start">Learn more</div>
+        </div>
+    </div>
+    <div id="auth">
+        <div id="wrapper">
+            <p class="title">Login or Create a new Account</p>
+            <div id="headbar">
+                <div id="sl-login" class="active">
+                    <p class="title">Login</p>
+                </div>
+                <div id="sl-register">
+                    <p class="title">Register</p>
+                </div>
+            </div>
+            <div id="login" class="active">
+                <label for="login-email">Enter your credentials</label>
+                <input type="text" id="login-email" placeholder="Email">
+                <input type="password" id="login-password" placeholder="Password">
+                <button id="login-cancel">Cancel</button>
+                <button id="login-submit">Login</button>
+                <button id="login-google">Login with Google</button>
+                <p id="incorrect">Your credentials are incorrect!</p>
+            </div>
+            <div id="register">
+                <label for="register-email">Become a Codifier</label>
+                <input type="text" id="register-email" placeholder="Email">
+                <input type="password" id="register-password" placeholder="Password">
+                <input type="password" id="register-retype-password" placeholder="Retype password">
+                <button id="register-cancel">Cancel</button>
+                <button id="register-submit">Register</button>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    class NavigationBar{
+        constructor() {
+            this.element = document.getElementById('nav-bar');
+            this.logo = this.element.querySelector('#logo')
+            this.menu = this.element.querySelector('#menu');
+            this.drawer = document.getElementById('mobile-menu')
+            this.showLogin = function() {}
+            this.menu.addEventListener('click',()=>{
+                let children = this.menu.children
+                if (children[0].classList[1] === 'active') {
+                    children[0].classList.remove('active');
+                    children[1].classList.remove('active');
+                    children[2].classList.remove('active');
+                    this.drawer.classList.remove('active')
+                } else {
+                    children[0].classList.add('active');
+                    children[1].classList.add('active');
+                    children[2].classList.add('active');
+                    this.drawer.classList.add('active')
+                }
+            })
+            this.logo.addEventListener('click',()=>{
+                location.href = '/'
+            })
+        }
+    }
+    class Main {
+        constructor () {
+            this.learnMore = document.getElementById('learnmore')
+            this.mainLoginDesktop = document.getElementById('main-login-desktop')
+            this.mainLoginMobile = document.getElementById('main-login-mobile')
+            this.showAuth = ()=>{};
+            this.mainLoginDesktop.addEventListener('click',()=>{
+                this.showAuth();
+            })
+            this.mainLoginMobile.addEventListener('click',()=>{
+                this.showAuth();
+            })
+        }
+    }
+    class Auth {
+        constructor() {
+            this.element = document.getElementById('auth');
+            this.hide = () => {
+                this.element.classList.remove('visible')
+            }
+            this.show = () => {
+                this.element.classList.add('visible')
+            }
+            this.wrapper = this.element.querySelector('#wrapper')
+            this.login = this.wrapper.querySelector('#login')
+            this.register = this.wrapper.querySelector('#register')
+            this.headbar = this.wrapper.querySelector('#headbar')
+            this.buttons = {
+                selectLogin: this.headbar.querySelector('#sl-login'),
+                selectRegister: this.headbar.querySelector('#sl-register'),
+                logCancel : this.login.querySelector('#login-cancel'),
+                regCancel : this.register.querySelector('#register-cancel')
+            }
+            this.buttons.selectLogin.addEventListener('click',()=>{
+                console.log(this.login)
+                this.buttons.selectRegister.classList.remove('active')
+                this.buttons.selectLogin.classList.add('active')
+                this.login.classList.add('active')
+                this.register.classList.remove('active')
+            })
+            this.buttons.selectRegister.addEventListener('click',()=>{
+                this.buttons.selectRegister.classList.add('active')
+                this.buttons.selectLogin.classList.remove('active')
+                this.login.classList.remove('active')
+                this.register.classList.add('active')
+            })
+            this.buttons.logCancel.addEventListener('click',()=>{
+                this.hide()
+            })
+            this.buttons.regCancel.addEventListener('click',()=>{
+                this.hide()
+            })
+        }
+    }
+    var navbar = new NavigationBar()
+    var auth = new Auth();
+    var main = new Main();
+    main.showAuth= () => {
+        auth.show()
+    }
+    if (window.location.search === '?login=true') {
+        auth.show()
+    }
+</script>
+</html>
