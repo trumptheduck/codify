@@ -638,7 +638,14 @@
                 selectLogin: this.headbar.querySelector('#sl-login'),
                 selectRegister: this.headbar.querySelector('#sl-register'),
                 logCancel : this.login.querySelector('#login-cancel'),
-                regCancel : this.register.querySelector('#register-cancel')
+                regCancel : this.register.querySelector('#register-cancel'),
+                logSubmit : this.login.querySelector('#login-submit'),
+            }
+            this.forms = {
+                login: {
+                    email: this.login.querySelector('#login-email'),
+                    password: this.login.querySelector('#login-password')
+                }
             }
             this.buttons.selectLogin.addEventListener('click',()=>{
                 console.log(this.login)
@@ -653,11 +660,27 @@
                 this.login.classList.remove('active')
                 this.register.classList.add('active')
             })
+            this.loginFailed = this.login.querySelector('#incorrect')
             this.buttons.logCancel.addEventListener('click',()=>{
                 this.hide()
             })
             this.buttons.regCancel.addEventListener('click',()=>{
                 this.hide()
+            })
+            this.buttons.logSubmit.addEventListener('click',()=>{
+                var uEmail = this.forms.login.email.value;
+                var uPassword = this.forms.login.password.value;
+                console.log(uEmail,uPassword)
+                fetch(`/api/login?email=${uEmail}&password=${uPassword}`)
+                .then(response => response.json())
+                .then(isAuthorized => {
+                    if (isAuthorized) {
+                        location.href = '/dashboard'
+                    } else {
+                        this.loginFailed.classList.add('visible')
+                    }
+                });
+
             })
         }
     }

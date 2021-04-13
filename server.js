@@ -1,208 +1,188 @@
-const express = require('express');
+import express from 'express'
+import http from 'http'
+import path from 'path'
+import session from 'express-session';
+import Hash from './modules/Hash.js'
+import SQL from './modules/SQL.js'
+import Gmail from './modules/Gmail.js';
+import './placeholders/data.js'
 const app = express()
-const http = require('http').Server(app);
-const path = require("path")
+const httpServer = http.Server(app);
 const httpPort = 80;
-var data = [
-    {
-        name: '1.Console và console.log()',
-        index:1,
-        content: ` <p>Bài 1</p>
-        <p>Để in giá trị ra console, ta dùng hàm:</p>
-        <code class="language-js">console.log("value_to_print")</code><br>
-        <p>Muốn mở console và chạy code, hãy ấn Open console để mở cửa sổ, và ấn Run</p>`
-    },
-    {
-        name: '2.Các loại dữ liệu',
-        index:2,
-        content: ` <p>Bài 2</p>
-        <p>Để khai báo biến, ta dùng </p>
-        <code class="language-js">var variable_name</code><br>
-        <code class="language-js">let variable_name</code><br>
-        <code class="language-js">const constant_name</code><br>
-        <p>Biến của Javascript không có loại, nên có thể nhận nhiều loại giá trị như String, Char, Int, Float...</p>
-        <p>Hãy khai báo và in ra màn hình 4 loại biến: Char, Int, String, Float</p>`
-        
-    },
-    {
-        name: '3.Hàm, tham số và return',
-        index:3,
-        content: ` <p>Bài 3</p>
-        <p>Để khai báo một hàm, ta dùng cú pháp sau</p>
-        <code class="language-js">funtion ten_ham(tham_so) {
-            //Noi dung cua ham
-            return gia_tri_tra_ve;
-        }</code><br>
-        <p>Hàm có thể có hoặc không có return, nếu hàm không có return thì sẽ không trả về giá trị gì và ngược lại, hàm có return sẽ trả về giá trị đặt ở đằng sau return, gắn trực tiếp vào hàm</p>
-        <code class="language-js">funtion ham1() {
-            var a = 90;
-            return a;
-        }</code><br>
-        <code class="language-js">funtion ham2() {
-            var a = 90;
-        }</code><br>
-        <code class="language-js">console.log(ham1())//Log ra 90</code><br>
-        <code class="language-js">console.log(ham2())//Log ra undefined, vi ham khong tra ve gia tri</code><br>
-        `
-    },
-    {
-        name: '4.Giới thiệu về Mảng và Object',
-        index:4,
-        content: ` <p>Bài 4</p>
-        <p>Mảng và object được khai báo như sau:</p>
-        <code class="language-js">var array = [1,2,3];</code><br>
-        <code class="language-js">var object = {attr1: "Something", attr2: 69};</code><br>
-        <p>Độ dài của mảng được truy cập như sau</p>
-        <code class="language-js">array.length;//Ket qua la 3</code><br>
-        <p>Các phần tử của mảng được truy cập qua index, tức là vị trí của phần tử trong mảng, từ trái qua phải, tính từ 0 đến hết mảng</p>
-        <code class="language-js">array[0];//Dap an la 1</code><br>
-        <code class="language-js">array[1];//Dap an la 2</code><br>
-        <code class="language-js">array[2];//Dap an la 3</code><br>
-        <p>Các thuộc tính của 1 object được truy cập như sau</p>
-        <code class="language-js">object.attr1;//Dap an la "Something"</code><br>
-        <code class="language-js">object.attr2;//Dap an la 69</code><br>
-        `
-    },
-    {
-        name: '5.If, For và các phép toán so sánh',
-        index:5,
-        content: ` <p>Bài 5</p>
-        <p>Cú pháp vòng lặp for</p>
-        <code class="language-js">for (let i = 0;i<10;i++) {/*Code lap lai*/}</code><br><br>
-        <code class="language-js">for (khai bao i;dieu kien cua i;tang tien cua i) {/*Code lap lai*/}</code><br><br>
-        <code class="language-js">if (dieukien) {/*Code ung voi dieu kien*/}</code><br><br>
-        <code class="language-js">if (dieukien) {/*Code ung voi dieu kien*/} else {/*code khong ung voi dieu kien*/}</code><br><br>
-        <code class="language-js">if (dieukien1) {/*Code ung voi dieu kien 1*/} else if (dieukien2) {/*Code ung voi dieu kien 2*/}</code><br><br>
-        <code class="language-js">if (dieukien1) {/*Code ung voi dieu kien 1*/} else if (dieukien2) {/*Code ung voi dieu kien 2*/} else {/*code khong ung voi dieu kien nao*/}</code><br><br>
-        <p>Các phép so sánh:</p>
-        <p>Bằng nhau</p>
-        <code class="language-js">a===b</code><br>
-        <p> Lớn hơn, nhỏ hơn, lớn hơn hoặc bằng, nhỏ hơn hoặc bằng</p>
-        <code class="language-js">a>b;</code><br>
-        <code class="language-js">a<b;</code><br>
-        <code class="language-js">a>=b;</code><br>
-        <code class="language-js">a<=b</code><br>
-        <p> Khác nhau</p>
-        <code class="language-js">a!==b</code><br>
-        <p>Điều kiện và/hoặc</p>
-        <p>Và:</p>
-        <code class="language-js">if (dieukien1&&dieukien2) {}</code><br>
-        <p>Hoặc:</p>
-        <code class="language-js">if (dieukien1||dieukien2) {}</code><br>
-        `
-    },
-    {
-        name: '6. Bài tập luyện tập Buổi 1',
-        index:6,
-        content: ` <p>Bài 6</p>
-        <p>Cho một mảng chứa các học sinh như sau:</p>
-        <code class="language-js">var danhsachHS = [
+var cachedData = [];
+var SQLconfig = {
+    host: "freedb.tech",
+    user: "freedbtech_nhat",
+    password: "nhat1234",
+    database: "freedbtech_nhatnhat"
+  }
+const UsersTableConfig = {
+    name : 'Users',
+    rows : [
+        {
+            name : 'email',
+            type : 'VARCHAR(255)'
+        },
+        {
+            name : 'hash',
+            type : 'VARCHAR(1000)'
+        },
+        {
+            name : 'id',
+            type : 'VARCHAR(255)'
+        },
+        {
+            name : 'isVerified',
+            type : 'VARCHAR(255)'
+        },
+        {
+            name : 'verifyOTP',
+            type : 'VARCHAR(255)'
+        },
+    ]
+}
+class User {
+    constructor(email,hash,id,isVerified,verifyOTP) {
+        this.query = [
             {
-                name: "Nguyen Thi Thuy",
-                age: 16,
-                class: "Lop 11",
-                sex: "Nu"
+                name: "email",
+                value: email
             },
             {
-                name: "Nguyen Van Huy",
-                age: 23,
-                class: "DT-05",
-                sex: "Nam"
+                name: "hash",
+                value: JSON.stringify(hash)
             },
             {
-                name: "Tran Van Bang",
-                age: 30,
-                class: "Lua dao",
-                sex: "Nam"
+                name: "id",
+                value: id
             },
             {
-                name: "Vu Van Toan",
-                age: 22,
-                class: "KTVL-01",
-                sex: "Nam"
+                name: "isVerified",
+                value: isVerified
             },
             {
-                name: "Bui Viet Hoang",
-                age: 4,
-                class: "Lop 4 Tuoi",
-                sex: "Nam"
+                name: "verifyOTP",
+                value: verifyOTP
             },
-            {
-                name: "Mai Van Khang",
-                age: 10,
-                class: "Di lam tho xay",
-                sex: "Nam"
-            },
-            {
-                name: "Que Thi Lan",
-                age: 6,
-                class: "Lop 1",
-                sex: "Nu"
-            },
-            {
-                name: "Mikami Yua",
-                age: 69,
-                class: "JAV-HD",
-                sex: "Nu"
-            },
-            {
-                name: "Dinh The Thanh",
-                age: 21,
-                class: "CNTT V-N-01",
-                sex: "Nam"
-            },
-            {
-                name: "Mai Thi Dieu Linh",
-                age: 18,
-                class: "CTTT",
-                sex: "Nu"
-            },
-            {
-                name: "Nguyen Van Truong Giang",
-                age: 20,
-                class: "CNTT-01",
-                sex: "Nam"
-            },
-            {
-                name: "Mai Thi Diem Quynh",
-                age: 19,
-                class: "CNTT-01",
-                sex: "Nu"
-            },
-            {
-                name: "Bui Kien Cuong",
-                age: 19,
-                class: "Logistics-01",
-                sex: "Nam"
-            },
-            {
-                name: "Dinh Quang Hieu",
-                age: 18,
-                class: "CK-11",
-                sex: "Nam"
-            },
-        ]</code><br>
-        <p>Hãy copy mảng trên vào trong trình viết code, phân tích các thuộc tính của từng học sinh, và viết ra các hàm như sau:</p>
-        <p>a)Hàm thứ nhất đếm số học sinh là nữ, trả về qua</p>
-        <code class="language-js">return</code><br>
-        <p>b) Hàm thứ hai lưu tên của các học sinh trên 18 tuổi vào một mảng, trả về mảng đó</p>
-        <p>c)Hàm thứ ba in ra tất cả tên và nghề nghiệp của các học sinh là nam và trên 18 tuổi</p>
-        <p>d)Cho biết tuổi quan hệ tình dục hợp pháp ở Việt Nam là trên 16 tuổi, đếm số cặp nam nữ thỏa mãn yêu cầu này, và in ra màn hình</p>
-        <p>Các kiến thức bổ trợ có thể tìm được ở những bài trên</p>
-        <p> Chúc các bạn may mắn ! </p>
-        `
-    },
-]
+        ]
+    }
+}
+class DatabaseManager {
+    static updateCachedData (callback=()=>{}) {
+        MySQL.getTable('Users',(data)=> {
+            cachedData = data;
+            callback();
+        })
+    }
+    static createUserTable () {
+        MySQL.createTable(UsersTableConfig);
+    }
+    static addUserToDatabase (user) {
+        MySQL.insertToTable('Users',user)
+    }
+}
+class AccountManager  {
+    static newAccount(email,password) {
+    DatabaseManager.updateCachedData(()=>{
+        let accountExisted = cachedData.find(user => user.email === email)
+        if (accountExisted!==undefined) {
+        console.log("Email taken!")
+        } else {
+        var user = new User(email,Hash.hash(password,Hash.generateSalt(12)),Hash.makeid(16),false,Hash.makeid(32));
+        DatabaseManager.addUserToDatabase(user)
+        console.log(`Account: ${email} has been created!`)
+        DatabaseManager.updateCachedData(()=>{
+        console.log("Cached",cachedData)
+        console.log(JSON.parse(cachedData[0].hash))
+        })
+      }
+    })
+    };
+    static deleteAccount(email) {
+        users = users.filter(user => user.email === email);
+        console.log(`Account: ${email} is deleted!`)
+        console.log('Users:',users)
+    }
+    static login(email,password,callback) {
+        DatabaseManager.updateCachedData(()=>{
+            let user = cachedData.find(user => user.email === email)
+            var isAuthorized = false;
+            if (user===undefined) {
+            console.log("Account not existed!")
+            } else {
+            var hash = JSON.parse(user.hash)
+            isAuthorized = Hash.compare(password,hash)
+          }
+          return callback(isAuthorized)
+        })
+    }
+  }
+var MySQL = new SQL(SQLconfig);
+MySQL.onConnect= () =>{
+    //DatabaseManager.createUserTable()
+    //AccountManager.newAccount("nhatyt123@gmail.com","nhat1234")
+   // DatabaseManager.updateCachedData(()=>{
+    //    console.log("Cached",cachedData)
+    //    console.log(JSON.parse(cachedData[0].hash))
+    //})
+    //Gmail.sendEmail('nhatyt123@gmail.com','Fuck you!',"Yeah")
+}
+
+
 app.use(express.static(path.join(__dirname, 'public')))
-app.get('/', function(req, res) {
-  res.sendFile(path.join(__dirname, 'public/views/index.html'))
-})
-app.get('/console', function(req, res) {
-    res.sendFile(path.join(__dirname, 'public/views/console.html'))
-  })
-  app.get('/api/data', function(req, res) {
-      res.send(JSON.stringify(data.find(element => element.index == req.query.index)))
-  })
-http.listen(httpPort, function () {
+app.use(session({
+    key: 'user_sid',
+    secret: 'hasdg1g23kbciaufgd18v9q7vfiafva98df7aaG',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        expires: 600000
+    }
+}));
+var sessionChecker = (req, res, next) => {
+    if (req.session.loggedin) {
+        res.redirect('/home');
+    } else {
+        next()
+    }
+    };
+    app.get('/',sessionChecker,function(req, res) {
+    res.sendFile(path.join(__dirname, 'public/views/index.html'))
+    })
+    app.get('/console', function(req, res) {
+        res.sendFile(path.join(__dirname, 'public/views/console.html'))
+    })
+    app.get('/xls', function(req, res) {
+        res.sendFile(path.join(__dirname, 'public/views/xls.html'))
+    })
+    app.get('/api/data', function(req, res) {
+        res.send(JSON.stringify(data.find(element => element.index == req.query.index)))
+    })
+    app.get('/api/login', function(req, res) {
+        if (req.query.email !== undefined&&req.query.password !== undefined) {
+            AccountManager.login(req.query.email,req.query.password,(isAuthorized)=>{
+                if (isAuthorized) {
+                    req.session.loggedin = true;
+                    req.session.username = req.query.email;
+                    res.send("true");
+                } else {
+                    res.send("false");
+                }
+                res.end();
+            })
+        } else {
+            res.redirect('/')
+        }
+        
+    })
+    app.get('/dashboard', (req, res)=>{
+        if (req.session.loggedin) {
+            res.send('Welcome back, ' + req.session.username + '!');
+        } else {
+            res.send('Please login to view this page!');
+        }
+        res.end();
+    });
+httpServer.listen(httpPort, function () {
   console.log(`Listening on port ${httpPort}!`)
 })

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+        crossorigin="anonymous">
+    <title>Convert excel to JSON Object</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
+</head>
+<body>
+    <script>
+    function Export2Word(element, filename = ''){
+    var preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
+    var postHtml = "</body></html>";
+    var html = preHtml+document.getElementById(element).innerHTML+postHtml;
+
+    var blob = new Blob(['\ufeff', html], {
+        type: 'application/msword'
+    });
+    
+    // Specify link url
+    var url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
+    
+    // Specify file name
+    filename = filename?filename+'.doc':'document.doc';
+    
+    // Create download link element
+    var downloadLink = document.createElement("a");
+
+    document.body.appendChild(downloadLink);
+    
+    if(navigator.msSaveOrOpenBlob ){
+        navigator.msSaveOrOpenBlob(blob, filename);
+    }else{
+        // Create a link to the file
+        downloadLink.href = url;
+        
+        // Setting the file name
+        downloadLink.download = filename;
+        
+        //triggering the function
+        downloadLink.click();
+    }
+    
+    document.body.removeChild(downloadLink);
+}
+</script>
+    <div class="conatiner mt-5">
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-3">
+                <input class="form-control" type="file" id="input" accept=".xls,.xlsx"  >
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary" id="button">Convert</button>
+            </div>
+<div class="col-md-12">
+    <pre id="jsondata"></pre>
+</div>
+        </div>
+    </div>
+    <button onclick="Export2Word('exportContent');">Export as .doc</button>
+<div id="docx">
+    <div id="exportContent">
+        <style>
+            table, th, td {
+      border: 1px solid black;
+    }
+        </style>
+        <!-- Your content here -->
+        <table id="targeted-table" style="width:100%">
+            
+            </table>
+    </div>
+</div>
+<script>
+        class Table {
+        constructor(){
+            this.element = document.getElementById('exportContent');
+            this.table = this.element.querySelector('#targeted-table')
+            this.renderTable= (data)=>{
+                var html = '';
+                var head = '';
+                var body = '';
+                console.log(Object.getOwnPropertyNames(data[0]))
+                Object.getOwnPropertyNames(data[0]).forEach(property=>{
+                    if (property === "__rowNum__") {} else {
+                        head += `<th>${property}</th>
+                        `
+                    }
+                })
+                data.forEach(row=>{
+                    var rowHTML = ''
+                    for (const property in row) {
+                        if (property !== "__rowNum__")
+                        rowHTML += `<td>${row[property]}</td>
+                        `
+                    }
+                    body += `<tr>
+                        ${rowHTML}
+                        </tr>
+                            `
+                })
+                html = `
+                <tr>${head}</tr>
+                ${body}
+                `
+                console.log(html)
+                this.table.innerHTML = html
+            }
+        }
+    }
+    var table = new Table()
+    let selectedFile;
+        console.log(window.XLSX);
+        document.getElementById('input').addEventListener("change", (event) => {
+            selectedFile = event.target.files[0];
+        })
+
+        let data=[{
+            "name":"jayanth",
+            "data":"scd",
+            "abc":"sdef"
+        }]
+        document.getElementById('button').addEventListener("click", () => {
+            XLSX.utils.json_to_sheet(data, 'out.xlsx');
+            if(selectedFile){
+                let fileReader = new FileReader();
+                fileReader.readAsBinaryString(selectedFile);
+                fileReader.onload = (event)=>{
+                let data = event.target.result;
+                let workbook = XLSX.read(data,{type:"binary"});
+                console.log(workbook);
+                workbook.SheetNames.forEach(sheet => {
+                    let rowObject = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheet]);
+                    console.log(rowObject);
+                    table.renderTable(rowObject)
+                });
+                }
+            }
+        });
+
+</script>
+</body>
+</html>
