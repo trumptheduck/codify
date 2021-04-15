@@ -325,9 +325,9 @@
                 var head = '';
                 var body = '';
                 console.log(Object.getOwnPropertyNames(data[0]))
-                Object.getOwnPropertyNames(data[0]).forEach(property=>{
+                propertyArray.forEach(property=>{
                     if (property === "__rowNum__") {} else {
-                        head += `<th>${property}</th>
+                        head += `<td>${property}</td>
                         `
                     }
                 })
@@ -358,6 +358,7 @@
                 } else {
                   this.clearNullRow(this.table)
                   html = `
+                  <tr>${head}</tr>
                 ${style}
                 ${body}
                 `
