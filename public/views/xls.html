@@ -297,10 +297,10 @@
             this.element = document.getElementById('preview');
             this.table = null;
             this.getTableStyle = (table)=>{
-              var cssTD = getComputedStyle(table.querySelectorAll('TD')[0]).cssText
+              var cssTD = getComputedStyleCSSText(table.querySelectorAll('TD')[0])
               //var cssTH = getComputedStyle(table.querySelectorAll('TH')[0]).cssText
-              var cssTR = getComputedStyle(table.querySelectorAll('TR')[0]).cssText
-              var cssTABLE = getComputedStyle(table).cssText
+              var cssTR = getComputedStyleCSSText(table.querySelectorAll('TR')[0])
+              var cssTABLE = getComputedStyleCSSText(table)
               
               var styling = `<style>
                 th, td {${cssTD}}

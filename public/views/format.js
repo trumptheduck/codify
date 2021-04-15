@@ -35,3 +35,17 @@ function cleanHTML(html) {
     console.log(result)
     return result
 }
+function getComputedStyleCSSText(element) {
+    var style = window.getComputedStyle(element), cssText;
+   
+    if (style.cssText != "") {
+      return style.cssText;
+    }
+   
+    cssText = "";
+    for (var i = 0; i < style.length; i++) {
+      cssText += style[i] + ": " + style.getPropertyValue(style[i]) + "; ";
+    }
+    
+    return cssText;
+  }

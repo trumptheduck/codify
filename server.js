@@ -8,7 +8,7 @@ import Gmail from './modules/Gmail.js';
 import './placeholders/data.js'
 const app = express()
 const httpServer = http.Server(app);
-const httpPort = 80;
+const httpPort = 5500;
 var cachedData = [];
 var SQLconfig = {
     host: "freedb.tech",
