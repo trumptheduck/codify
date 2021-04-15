@@ -1,87 +1,302 @@
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+<html>
+  <head>
+    <title>DOCX XLS Table Insert Tool</title>
+    <meta charset="utf-8" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
         crossorigin="anonymous">
-    <title>Convert excel to JSON Object</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
-</head>
-<body>
-    <script>
-    function Export2Word(element, filename = ''){
-    var preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
-    var postHtml = "</body></html>";
-    var html = preHtml+document.getElementById(element).innerHTML+postHtml;
-
-    var blob = new Blob(['\ufeff', html], {
-        type: 'application/msword'
-    });
-    
-    // Specify link url
-    var url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
-    
-    // Specify file name
-    filename = filename?filename+'.doc':'document.doc';
-    
-    // Create download link element
-    var downloadLink = document.createElement("a");
-
-    document.body.appendChild(downloadLink);
-    
-    if(navigator.msSaveOrOpenBlob ){
-        navigator.msSaveOrOpenBlob(blob, filename);
-    }else{
-        // Create a link to the file
-        downloadLink.href = url;
-        
-        // Setting the file name
-        downloadLink.download = filename;
-        
-        //triggering the function
-        downloadLink.click();
-    }
-    
-    document.body.removeChild(downloadLink);
+  </head>
+  <style>
+.wrapper {
+    position: relative;
+  width: 200px;
+  height: 30px;
+  transform: scale(0.5,0.5);
+  display: none;
 }
-</script>
-    <div class="conatiner mt-5">
-        <div class="row">
-            <div class="col-md-3"></div>
-            <div class="col-md-3">
-                <input class="form-control" type="file" id="input" accept=".xls,.xlsx"  >
-            </div>
-            <div class="col-md-2">
-                <button class="btn btn-primary" id="button">Convert</button>
-            </div>
-<div class="col-md-12">
-    <pre id="jsondata"></pre>
-</div>
+.wrapper.active {
+    display: block;
+}
+.wrapper {
+  position: relative;
+  background: #e7f0f7;
+}
+.progressbar {
+  display: block;
+  position: absolute;
+  z-index: 9;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  width: 400px;
+  height: 30px;
+}
+.progressbar::before,
+.progressbar::after {
+  content: '';
+  display: block;
+  position: absolute;
+  z-index: 99;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
+  background-image: linear-gradient(90deg, #e91e63 0%, #e91e63 20%, #03a9f4 20%, #03a9f4 40%, #8bc34a 40%, #8bc34a 60%, #ffeb3b 60%, #ffeb3b 80%, #ff5722 80%, #ff5722 100%);
+  background-position: 0 0;
+  background-repeat: repeat-x;
+  animation: movebar 5s linear infinite;
+}
+.progressbar::before {
+  box-shadow: 0 6px 10px 0 rgba(0,0,0,0.1);
+}
+.progressbar::after {
+  z-index: 9;
+  top: 6px;
+  filter: blur(16px);
+  opacity: 0.7;
+}
+.stylization {
+  position: absolute;
+  z-index: 999;
+  height: 4px;
+  width: 90%;
+  left: 5%;
+  top: 6px;
+  opacity: 0.3;
+}
+.stylization::before,
+.stylization::after {
+  content: '';
+  display: block;
+  position: absolute;
+  height: 4px;
+  top: 0;
+  border-radius: 2px;
+}
+.stylization::before {
+  background: #fff;
+  left: 0;
+  right: 10px;
+}
+.stylization::after {
+  width: 6px;
+  background: #fff;
+  right: 0;
+}
+@-moz-keyframes movebar {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 400px 0;
+  }
+}
+@-webkit-keyframes movebar {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 400px 0;
+  }
+}
+@-o-keyframes movebar {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 400px 0;
+  }
+}
+@keyframes movebar {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 400px 0;
+  }
+}
+
+  </style>
+  <body>
+    <p></p>
+    <!--Add buttons to initiate auth sequence and sign out-->
+    <button id="authorize_button" style="display: none;">Sign in with Google</button>
+    <button id="signout_button" style="display: none;">Sign Out</button>
+    <div id="upload">
+      <button onclick="Export2Word('preview');">Export as .doc</button>
+        <h1>Select DOC file to edit</h1>
+              <div class="conatiner mt-5">
+                <div class="row">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-3">
+                        <input class="form-control" type="file" id="input" accept=".xls,.xlsx"  >
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary" id="button">Convert</button>
+                    </div>
+        <div class="col-md-12">
+            <pre id="jsondata"></pre>
+        </div>
+        <input type="file" placeholder='file' id='fileToUpload'>
+        <button id='uploadFile'>Analyze File</button>
+      </div>
+      <div id="loading" class="wrapper">
+        <div class="progressbar">
+            <div class="stylization"></div>
         </div>
     </div>
-    <button onclick="Export2Word('exportContent');">Export as .doc</button>
-<div id="docx">
-    <div id="exportContent">
-        <style>
-            table, th, td {
-      border: 1px solid black;
+      <div id="preview">
+
+      </div>
+      <script src="/views/format.js"></script>
+      <script src="/views/word.js"></script>
+    <script type="text/javascript">
+    const config = {
+        CLIENT_ID : '791670117361-uhgb5hhvjmbapa5kk2lqcc4qsqgr0jfl.apps.googleusercontent.com',
+        API_KEY : 'AIzaSyDOmRVwwVV2JB210WaI61WDLd_5_1S3mds',
+        DISCOVERY_DOCS : ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+        SCOPES : 'https://www.googleapis.com/auth/drive.file',
     }
-        </style>
-        <!-- Your content here -->
-        <table id="targeted-table" style="width:100%">
-            
-            </table>
-    </div>
-</div>
-<script>
-        class Table {
+        class GoogleOAUTH {
+            constructor(config) {
+                this.CLIENT_ID = config.CLIENT_ID
+                this.API_KEY = config.API_KEY
+                this.DISCOVERY_DOCS = config.DISCOVERY_DOCS
+                this.SCOPES = config.SCOPES
+                this.authorizeButton = document.getElementById('authorize_button');
+                this.signoutButton = document.getElementById('signout_button');
+                this.onLogin = ()=>{};
+                this.appendPre=(message)=>{
+                    var pre = document.getElementById('content');
+                    var textContent = document.createTextNode(message + '\n');
+                    pre.appendChild(textContent);
+                }
+                this.handleAuthClick=(event)=>{
+                    gapi.auth2.getAuthInstance().signIn();
+                }
+                this.handleSignoutClick=(event)=>{
+                    gapi.auth2.getAuthInstance().signOut();
+                }
+                this.updateSigninStatus = (isSignedIn)=>{
+                    if (isSignedIn) {
+                    this.authorizeButton.style.display = 'none';
+                    this.signoutButton.style.display = 'block';
+                    this.onLogin();
+                    } else {
+                    this.authorizeButton.style.display = 'block';
+                    this.signoutButton.style.display = 'none';
+                    }
+                }
+                this.initClient = ()=>{
+                    gapi.client.init({
+                    apiKey: this.API_KEY,
+                    clientId: this.CLIENT_ID,
+                    discoveryDocs: this.DISCOVERY_DOCS,
+                    scope: this.SCOPES
+                    }).then(()=>{
+                    // Listen for sign-in state changes.
+                    gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateSigninStatus);
+
+                    // Handle the initial sign-in state.
+                    this.updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+                    this.authorizeButton.onclick = this.handleAuthClick;
+                    this.signoutButton.onclick = this.handleSignoutClick;
+                    }, function(error) {
+                    this.appendPre(JSON.stringify(error, null, 2));
+                    });
+                }
+                this.handleClientLoad=()=>{
+                    gapi.load('client:auth2', this.initClient);
+                }
+            }
+        }
+        class oFileManager{
+            constructor() {
+                this.loadingBar = document.getElementById('loading')
+                this.toggleLoadingBar = (isActive)=>{
+                    if (isActive) {
+                        this.loadingBar.classList.add('active');
+                    } else {
+                        this.loadingBar.classList.remove('active');
+                    }
+                } 
+                this.previewElement = document.getElementById('preview')
+                this.uploadFile = (id) => {
+                    this.toggleLoadingBar(true)
+                    let input = document.getElementById(id)
+                    let ftu = input.files[0];
+                    let file = new Blob([ftu]); 
+                    gapi.client.drive.files.create({
+                        'content-type': 'application/json',
+                        uploadType: 'multipart',
+                        name: ftu.name,
+                        mimeType: 'application/vnd.google-apps.document',
+                        fields: 'id, name, kind, size'
+                    }).then(apiResponse => {
+                        this.previewElement.innerHTML= 'Uploading...'
+                        fetch(`https://www.googleapis.com/upload/drive/v3/files/${apiResponse.result.id}`, {
+                        method: 'PATCH',
+                        headers: new Headers({
+                            'Authorization': `Bearer ${gapi.client.getToken().access_token}`,
+                            'Content-Type': ftu.type
+                        }),
+                        body: file
+                    }).then(res => {
+                        var rawURL = res.url;
+                        var token = rawURL.replace("https://www.googleapis.com/upload/drive/v3/files/","")
+                        this.previewElement.innerHTML= `File Convert Succesful! Token: ${token}`
+                        var request = gapi.client.drive.files.export({ // Read more about export at https://developers.google.com/drive/v3/reference/files/export#http-request
+                            'fileId': token,
+                            'mimeType': 'text/html'
+                        })
+                        var fulfilledCallback = (fulfilled) => { // What to do when the request is fulfilled
+                            this.toggleLoadingBar(false)
+                            console.log("Request fulfilled!", fulfilled);
+                            console.log(fulfilled.body); // Stick the response body into the page — fulfilled.body should be where the text is
+                            var rawHTML = fulfilled.body;
+                            var html = formatHTML(rawHTML)
+                            var html = markdownTables(html)
+                            this.previewElement.innerHTML = html;
+                            var delRequest = gapi.client.drive.files.delete({
+                                'fileId': token
+                            });
+                            delRequest.execute(function(resp) {console.log(resp)});
+                        };
+                        var rejectedCallback = function(rejected) { // What to do when the request is rejected
+                            this.toggleLoadingBar(false)
+                            this.previewElement.innerHTML= `Request rejected! ${rejected}`
+                        };
+
+                        // Make the request — For some reason using .execute instead of .then doesn't work; their API docs (https://developers.google.com/api-client-library/javascript/reference/referencedocs#gapiclientrequest) recommend using .then
+                        request.then(fulfilledCallback, rejectedCallback)
+                    });
+                })
+                }
+            }
+        }
+      var googleOAuth = new GoogleOAUTH(config)
+      var FileManager = new oFileManager()
+      googleOAuth.onLogin=()=>{
+          console.log("LOGIN SUCCESSFULLY")
+      }
+      document.getElementById("uploadFile").addEventListener('click',()=>{
+        FileManager.uploadFile('fileToUpload')
+      })
+
+      class Table {
         constructor(){
-            this.element = document.getElementById('exportContent');
-            this.table = this.element.querySelector('#targeted-table')
+            this.element = document.getElementById('preview');
+            this.table = null;
             this.renderTable= (data)=>{
+                var style = `<style>
+                      table, th, td {
+                border: 1px solid black;
+              }
+                  </style>`
                 var html = '';
                 var head = '';
                 var body = '';
@@ -105,15 +320,19 @@
                             `
                 })
                 html = `
+                ${style}
                 <tr>${head}</tr>
                 ${body}
                 `
                 console.log(html)
-                this.table.innerHTML = html
+                this.table.innerHTML = html;
             }
         }
     }
     var table = new Table()
+    tableCallback = function(resultTable) {
+      table.table = resultTable;
+    }
     let selectedFile;
         console.log(window.XLSX);
         document.getElementById('input').addEventListener("change", (event) => {
@@ -142,7 +361,10 @@
                 }
             }
         });
-
-</script>
-</body>
+    </script>
+    <script async defer src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};googleOAuth.handleClientLoad()"
+      onreadystatechange="if (this.readyState === 'complete') this.onload()">
+    </script>
+  </body>
 </html>
