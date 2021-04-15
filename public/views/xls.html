@@ -296,6 +296,15 @@
         constructor(){
             this.element = document.getElementById('preview');
             this.table = null;
+            this.clearNullRow = (table) =>{
+              table.querySelector('TBODY').querySelectorAll('tr').forEach(row=>{
+                var empty = true;
+                row.querySelectorAll('SPAN').forEach(span=>{
+                  if (span.innerHTML !== '') {empty = false};
+                })
+                if (empty) {row.remove()}
+              })
+            }
             this.getTableStyle = (table)=>{
               var cssTD = getComputedStyleCSSText(table.querySelectorAll('TD')[0])
               //var cssTH = getComputedStyle(table.querySelectorAll('TH')[0]).cssText
@@ -310,13 +319,12 @@
                 </style>`
                 return styling
             }
-            this.renderTable= (data,deleteOldData=false)=>{
+            this.renderTable= (data,propertyArray,deleteOldData=false)=>{
                 var style = this.getTableStyle(this.table)
                 var html = '';
                 var head = '';
                 var body = '';
                 console.log(Object.getOwnPropertyNames(data[0]))
-                var propertyArray = Object.getOwnPropertyNames(data[0])
                 Object.getOwnPropertyNames(data[0]).forEach(property=>{
                     if (property === "__rowNum__") {} else {
                         head += `<th>${property}</th>
@@ -348,6 +356,7 @@
                 ${body}
                 `
                 } else {
+                  this.clearNullRow(this.table)
                   html = `
                 ${style}
                 ${body}
@@ -373,6 +382,21 @@
             "data":"scd",
             "abc":"sdef"
         }]
+        function get_header_row(sheet) {
+          var headers = [];
+          var range = XLSX.utils.decode_range(sheet['!ref']);
+          var C, R = range.s.r; /* start in the first row */
+          /* walk every column in the range */
+          for(C = range.s.c; C <= range.e.c; ++C) {
+              var cell = sheet[XLSX.utils.encode_cell({c:C, r:R})] /* find the cell in the first row */
+
+              var hdr = "UNKNOWN " + C; // <-- replace with your desired default 
+              if(cell && cell.t) hdr = XLSX.utils.format_cell(cell);
+
+              headers.push(hdr);
+          }
+          return headers;
+      }
         document.getElementById('insertNoDelete').addEventListener("click", () => {
             XLSX.utils.json_to_sheet(data, 'out.xlsx');
             if(selectedFile){
@@ -384,8 +408,8 @@
                 console.log(workbook);
                 workbook.SheetNames.forEach(sheet => {
                     let rowObject = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheet]);
-                    console.log(rowObject);
-                    table.renderTable(rowObject)
+                    console.log(rowObject); 
+                    table.renderTable(rowObject,get_header_row(workbook.Sheets[sheet]))
                 });
                 }
             }
@@ -402,7 +426,7 @@
                 workbook.SheetNames.forEach(sheet => {
                     let rowObject = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheet]);
                     console.log(rowObject);
-                    table.renderTable(rowObject,true)
+                    table.renderTable(rowObject,get_header_row(workbook.Sheets[sheet]),true)
                 });
                 }
             }
