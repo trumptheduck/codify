@@ -8,6 +8,9 @@
         crossorigin="anonymous">
   </head>
   <style>
+    body {
+      margin-left: 30px;
+    }
 .wrapper {
     position: relative;
   width: 200px;
@@ -124,25 +127,27 @@
   <body>
     <p></p>
     <!--Add buttons to initiate auth sequence and sign out-->
-    <button id="authorize_button" style="display: none;">Sign in with Google</button>
-    <button id="signout_button" style="display: none;">Sign Out</button>
+    <button class="btn btn-success" id="authorize_button" style="display: none;">Sign in with Google</button>
+    <button class="btn btn-danger" id="signout_button" style="display: none;">Sign Out</button>
     <div id="upload">
-      <button onclick="Export2Word('preview');">Export as .doc</button>
-        <h1>Select DOC file to edit</h1>
+      <button class="btn btn-success" onclick="Export2Word('preview');">Lưu tài liệu</button>
               <div class="conatiner mt-5">
                 <div class="row">
                     <div class="col-md-3"></div>
                     <div class="col-md-3">
+                      <label>Chọn file excel </label>
                         <input class="form-control" type="file" id="input" accept=".xls,.xlsx"  >
                     </div>
                     <div class="col-md-2">
-                        <button class="btn btn-primary" id="button">Convert</button>
+                        <button class="btn btn-success" id="insertNoDelete">Nhập dữ liệu(Không xóa)</button>
+                        <button class="btn btn-warning" id="insertDelete">Nhập dữ liệu (Xóa DL cũ)</button>
                     </div>
         <div class="col-md-12">
             <pre id="jsondata"></pre>
         </div>
-        <input type="file" placeholder='file' id='fileToUpload'>
-        <button id='uploadFile'>Analyze File</button>
+        <h1>Chọn tài liệu để sửa</h1><br>
+        <input type="file" placeholder='file' id='fileToUpload' class="form-control" >
+        <button id='uploadFile' class="btn btn-primary">Load file</button>
       </div>
       <div id="loading" class="wrapper">
         <div class="progressbar">
@@ -291,12 +296,22 @@
         constructor(){
             this.element = document.getElementById('preview');
             this.table = null;
-            this.renderTable= (data)=>{
-                var style = `<style>
-                      table, th, td {
-                border: 1px solid black;
-              }
-                  </style>`
+            this.getTableStyle = (table)=>{
+              var cssTD = getComputedStyle(table.querySelectorAll('TD')[0]).cssText
+              //var cssTH = getComputedStyle(table.querySelectorAll('TH')[0]).cssText
+              var cssTR = getComputedStyle(table.querySelectorAll('TR')[0]).cssText
+              var cssTABLE = getComputedStyle(table).cssText
+              
+              var styling = `<style>
+                th, td {${cssTD}}
+                th {font-weight: bold;}
+                tr {${cssTR}}
+                table {${cssTABLE}}
+                </style>`
+                return styling
+            }
+            this.renderTable= (data,deleteOldData=false)=>{
+                var style = this.getTableStyle(this.table)
                 var html = '';
                 var head = '';
                 var body = '';
@@ -326,13 +341,20 @@
                         </tr>
                             `
                 })
-                html = `
+                if (deleteOldData) {
+                  html = `
                 ${style}
                 <tr>${head}</tr>
                 ${body}
                 `
+                } else {
+                  html = `
+                ${style}
+                ${body}
+                `
+                }
                 console.log(html)
-                this.table.innerHTML = html;
+                this.table.querySelector('TBODY').innerHTML += html;
             }
         }
     }
@@ -351,7 +373,7 @@
             "data":"scd",
             "abc":"sdef"
         }]
-        document.getElementById('button').addEventListener("click", () => {
+        document.getElementById('insertNoDelete').addEventListener("click", () => {
             XLSX.utils.json_to_sheet(data, 'out.xlsx');
             if(selectedFile){
                 let fileReader = new FileReader();
@@ -364,6 +386,23 @@
                     let rowObject = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheet]);
                     console.log(rowObject);
                     table.renderTable(rowObject)
+                });
+                }
+            }
+        });
+        document.getElementById('insertDelete').addEventListener("click", () => {
+            XLSX.utils.json_to_sheet(data, 'out.xlsx');
+            if(selectedFile){
+                let fileReader = new FileReader();
+                fileReader.readAsBinaryString(selectedFile);
+                fileReader.onload = (event)=>{
+                let data = event.target.result;
+                let workbook = XLSX.read(data,{type:"binary"});
+                console.log(workbook);
+                workbook.SheetNames.forEach(sheet => {
+                    let rowObject = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheet]);
+                    console.log(rowObject);
+                    table.renderTable(rowObject,true)
                 });
                 }
             }
