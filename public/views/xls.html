@@ -206,7 +206,7 @@
                     this.authorizeButton.onclick = this.handleAuthClick;
                     this.signoutButton.onclick = this.handleSignoutClick;
                     }, function(error) {
-                    this.appendPre(JSON.stringify(error, null, 2));
+                      console.log(error)
                     });
                 }
                 this.handleClientLoad=()=>{
@@ -301,6 +301,7 @@
                 var head = '';
                 var body = '';
                 console.log(Object.getOwnPropertyNames(data[0]))
+                var propertyArray = Object.getOwnPropertyNames(data[0])
                 Object.getOwnPropertyNames(data[0]).forEach(property=>{
                     if (property === "__rowNum__") {} else {
                         head += `<th>${property}</th>
@@ -309,11 +310,17 @@
                 })
                 data.forEach(row=>{
                     var rowHTML = ''
-                    for (const property in row) {
-                        if (property !== "__rowNum__")
-                        rowHTML += `<td>${row[property]}</td>
+                    propertyArray.forEach(property=>{
+                    if (property !== "__rowNum__") {
+                      if (row[property]===undefined) {
+                        rowHTML += `<td></td>
                         `
+                      } else {
+                        rowHTML += `<td>${row[property]}</td>
+                          `
+                      }
                     }
+                  })
                     body += `<tr>
                         ${rowHTML}
                         </tr>
