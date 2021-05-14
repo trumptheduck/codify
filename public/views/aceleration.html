@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Accelerator</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+</head>
+    <div id="console"></div>
+<body>
+    <script>
+        var elem = document.getElementById("console")
+        window.addEventListener('devicemotion', function(event) {
+            console.log(event.acceleration.x + ' m/s2');
+            elem.innerHTML = event.acceleration;
+        });
+    </script>
+</body>
+</html>
