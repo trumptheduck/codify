@@ -11,8 +11,7 @@
     <script>
         var elem = document.getElementById("console")
         window.addEventListener('devicemotion', function(event) {
-            console.log(event.acceleration.x + ' m/s2');
-            elem.innerHTML = JSON.stringify(event.acceleration);
+            elem.innerHTML = JSON.stringify(event.acceleration.x);
         });
     </script>
 </body>
