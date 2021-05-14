@@ -12,12 +12,7 @@
     <script>
         var elem = document.getElementById("console")
         var degree = document.getElementById("degree")
-        if (isiOS) {
-            window.addEventListener('deviceorientation', manageCompass)
-        } else if (isAndroid) {
-            window.addEventListener("deviceorientationabsolute", manageCompass, true);
-        }
-
+        window.addEventListener("deviceorientationabsolute", manageCompass, true);
         function manageCompass(event) {
             if (event.webkitCompassHeading) {
                 absoluteHeading = event.webkitCompassHeading + 180;
