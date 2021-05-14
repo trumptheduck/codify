@@ -155,6 +155,9 @@ var sessionChecker = (req, res, next) => {
     app.get('/xls', function(req, res) {
         res.sendFile(path.join(__dirname, 'public/views/xls.html'))
     })
+    app.get('/acceleration', function(req, res) {
+        res.sendFile(path.join(__dirname, 'public/views/aceleration.html'))
+    })
     app.get('/api/data', function(req, res) {
         res.send(JSON.stringify(data.find(element => element.index == req.query.index)))
     })
