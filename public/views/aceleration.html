@@ -8,21 +8,14 @@
 </head>
     <div id="console"></div>
     <div id="degree"></div>
+    <button id="vibrate">Vibrate</button>
 <body>
     <script>
+        
         var elem = document.getElementById("console")
         var degree = document.getElementById("degree")
-        window.addEventListener("deviceorientationabsolute", manageCompass, true);
-        function manageCompass(event) {
-            if (event.webkitCompassHeading) {
-                absoluteHeading = event.webkitCompassHeading + 180;
-            } else {
-                absoluteHeading = 180 - event.alpha;
-            }
-            degree.innerHTML = absoluteHeading;
-        }
         window.addEventListener('devicemotion', function(event) {
-            elem.innerHTML = `x:${Math.round(event.acceleration.x*100)/100},y:${Math.round(event.acceleration.y*100)/100}`;
+            elem.innerHTML = `x:${Math.round(event.acceleration.x*100)/100},y:${Math.round(event.acceleration.y*100)/100},z:${Math.round(event.acceleration.z*100)/100}`;
         });
     </script>
 </body>
